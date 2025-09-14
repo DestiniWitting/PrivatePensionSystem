@@ -1,0 +1,47 @@
+{
+  "name": "securepension-platform",
+  "version": "1.0.0",
+  "description": "Private pension management system powered by Zama FHE technology",
+  "main": "index.js",
+  "scripts": {
+    "test": "hardhat test",
+    "compile": "hardhat compile",
+    "node": "hardhat node",
+    "deploy": "hardhat ignition deploy ./ignition/modules/SecurePensionPlatform.js --network localhost",
+    "deploy-sepolia": "hardhat ignition deploy ./ignition/modules/SecurePensionPlatform.js --network sepolia",
+    "setup-local": "node scripts/setup-local.js",
+    "verify": "hardhat verify",
+    "coverage": "hardhat coverage",
+    "frontend": "cd frontend "frontend": "cd frontend && npm start""frontend": "cd frontend && npm start" PORT=3025 npm start",
+    "frontend-install": "cd frontend && npm install",
+    "build": "cd frontend && npm install && npm run build",
+    "start-all": "npm run node & sleep 5 && npm run deploy && npm run frontend",
+    "clean": "hardhat clean"
+  },
+  "keywords": [
+    "ethereum",
+    "defi",
+    "privacy",
+    "zama",
+    "fhe",
+    "fundraising",
+    "dex",
+    "zero-knowledge",
+    "confidential"
+  ],
+  "author": "SecurePension Team",
+  "license": "MIT",
+  "devDependencies": {
+    "@nomicfoundation/hardhat-toolbox": "^5.0.0",
+    "@nomicfoundation/hardhat-ignition-ethers": "^0.15.0",
+    "hardhat": "^2.22.0",
+    "hardhat-gas-reporter": "^1.0.10",
+    "solidity-coverage": "^0.8.0"
+  },
+  "dependencies": {
+    "@openzeppelin/contracts": "^5.0.2",
+    "@fhevm/solidity": "^0.5.0",
+    "ethers": "^6.13.0",
+    "dotenv": "^16.4.5"
+  }
+}

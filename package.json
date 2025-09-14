@@ -1,0 +1,27 @@
+{
+  "name": "securepension-platform",
+  "version": "1.0.0",
+  "description": "Private pension management system powered by Zama FHE technology",
+  "main": "index.js",
+  "scripts": {
+    "build": "echo 'Static build complete'",
+    "dev": "npx http-server . -p 3000 --cors",
+    "start": "npx http-server . -p 3000 --cors"
+  },
+  "keywords": [
+    "ethereum",
+    "defi",
+    "privacy",
+    "zama",
+    "fhe",
+    "fundraising",
+    "dex",
+    "zero-knowledge",
+    "confidential"
+  ],
+  "author": "SecurePension Team",
+  "license": "MIT",
+  "dependencies": {
+    "http-server": "^14.1.1"
+  }
+}

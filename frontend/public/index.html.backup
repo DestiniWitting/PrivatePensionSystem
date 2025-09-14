@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#059669" />
+    <meta name="description" content="Confidential Pension System - Private Retirement Management with FHE Technology" />
+    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
+    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+    <title>SecurePension - Confidential Retirement Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/ethers@6.7.1/dist/ethers.umd.min.js"></script>
+    <style>
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; }
+        .gradient-bg { background: linear-gradient(135deg, #064e3b 0%, #0f766e 50%, #064e3b 100%); }
+        .card { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2); }
+        .btn-primary { background: linear-gradient(135deg, #059669 0%, #10b981 100%); }
+        .btn-primary:hover { background: linear-gradient(135deg, #047857 0%, #059669 100%); }
+    </style>
+</head>
+<body class="gradient-bg min-h-screen">
+    <div id="root">
+        <!-- Navigation -->
+        <nav class="bg-black bg-opacity-30 backdrop-blur-lg border-b border-white border-opacity-20">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex items-center justify-between h-16">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0">
+                            <h1 class="text-xl font-bold text-white">🏦 SecurePension</h1>
+                        </div>
+                        <div class="hidden md:block">
+                            <div class="ml-10 flex items-baseline space-x-4">
+                                <a href="#home" class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Home</a>
+                                <a href="#dashboard" class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Dashboard</a>
+                                <a href="#contribute" class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Contribute</a>
+                                <a href="#invest" class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Investments</a>
+                                <a href="#retire" class="text-gray-300 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Retirement</a>
+                            </div>
+                        </div>
+                    </div>
+                    <div>
+                        <button id="connectWallet" class="btn-primary text-white px-4 py-2 rounded-lg text-sm font-medium hover:shadow-lg transition-all duration-200">
+                            Connect Wallet
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Hero Section -->
+        <section id="home" class="py-20">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+                <h1 class="text-5xl font-bold text-white mb-6">
+                    Confidential Pension System
+                </h1>
+                <p class="text-xl text-gray-300 mb-8 max-w-3xl mx-auto">
+                    Private Retirement Management with Fully Homomorphic Encryption Technology
+                </p>
+                <p class="text-lg text-gray-400 mb-10 max-w-2xl mx-auto">
+                    Secure your retirement with our advanced encryption technology that keeps your financial data completely private while enabling sophisticated investment strategies.
+                </p>
+                
+                <!-- Live Blockchain Status -->
+                <div class="bg-emerald-800 bg-opacity-50 backdrop-blur-lg rounded-lg p-4 max-w-2xl mx-auto mb-8">
+                    <p class="text-emerald-200 text-center" id="networkStatus">
+                        🔗 Connect MetaMask to access Sepolia Testnet
+                    </p>
+                </div>
+                
+                <div class="flex justify-center space-x-4">
+                    <button id="startPensionBtn" class="btn-primary text-white px-8 py-3 rounded-lg text-lg font-semibold hover:shadow-xl transition-all duration-300">
+                        Start Your Pension
+                    </button>
+                    <button class="bg-transparent border-2 border-white text-white px-8 py-3 rounded-lg text-lg font-semibold hover:bg-white hover:text-emerald-900 transition-all duration-300">
+                        Learn More
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- Status Message -->
+        <section class="pb-8">
+            <div class="max-w-4xl mx-auto px-4">
+                <div class="bg-gray-800 bg-opacity-50 backdrop-blur-lg rounded-lg p-4">
+                    <p class="text-white text-center" id="statusMessage">
+                        ➤ Connect your wallet to start managing your encrypted retirement fund
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Account Creation Form (hidden initially) -->
+        <section id="accountCreation" class="pb-8 hidden">
+            <div class="max-w-4xl mx-auto px-4">
+                <div class="card rounded-xl p-6">
+                    <h2 class="text-2xl font-semibold text-white mb-4">Create Your Pension Account</h2>
+                    <div class="flex flex-col sm:flex-row gap-4 items-end">
+                        <div class="flex-1">
+                            <label class="block text-gray-300 text-sm font-medium mb-2">
+                                Target Retirement Age (55-75)
+                            </label>
+                            <input
+                                type="number"
+                                min="55"
+                                max="75"
+                                placeholder="65"
+                                id="retirementAge"
+                                class="w-full px-4 py-3 bg-gray-800 text-white rounded-lg border border-gray-600 focus:border-emerald-500 focus:outline-none"
+                            />
+                        </div>
+                        <button
+                            id="createAccountBtn"
+                            class="bg-gradient-to-r from-emerald-600 to-green-600 hover:from-emerald-700 hover:to-green-700 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-200"
+                        >
+                            Create Account
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Dashboard Section -->
+        <section id="dashboard" class="py-16">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <h2 class="text-3xl font-bold text-white text-center mb-12">Pension Dashboard</h2>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    <div class="card rounded-xl p-6">
+                        <h3 class="text-2xl font-semibold text-white mb-6">Account Overview</h3>
+                        <div class="space-y-4">
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-300">Encrypted Balance:</span>
+                                <span class="text-2xl font-bold text-emerald-400" id="totalBalance">$0.00</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-300">Retirement Age:</span>
+                                <span class="text-xl font-semibold text-white" id="accountRetireAge">--</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-300">Investment Strategy:</span>
+                                <span class="text-lg font-medium text-emerald-300" id="strategy">Not Selected</span>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-300">Account Status:</span>
+                                <span class="text-lg font-medium text-green-400" id="accountStatus">--</span>
+                            </div>
+                        </div>
+                        <button
+                            id="calculateReturnsBtn"
+                            class="mt-6 w-full bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white px-6 py-3 rounded-lg font-semibold transition-all duration-200"
+                        >
+                            Calculate Returns
+                        </button>
+                    </div>
+                    <div class="card rounded-xl p-6">
+                        <h3 class="text-2xl font-semibold text-white mb-6">Make Contribution</h3>
+                        <div class="space-y-4">
+                            <input type="number" id="contributionAmount" step="0.001" placeholder="Enter amount in ETH" 
+                                   class="w-full px-4 py-3 bg-gray-800 text-white rounded-lg border border-gray-600 focus:border-emerald-500 focus:outline-none">
+                            <button id="contributeBtn" class="btn-primary w-full text-white px-6 py-3 rounded-lg font-semibold hover:shadow-lg transition-all duration-200">
+                                Contribute to Pension
+                            </button>
+                        </div>
+                        <div class="mt-4 text-gray-300 text-sm space-y-1">
+                            <p>• Contributions encrypted using FHE technology</p>
+                            <p>• Earn compound returns over time</p>
+                            <p>• Secure blockchain transactions on Sepolia</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Investment Section -->
+        <section id="invest" class="py-16">
+            <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+                <h2 class="text-3xl font-bold text-white text-center mb-12">Investment Strategies</h2>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <div class="card rounded-xl p-6 hover:shadow-xl transition-all duration-300 cursor-pointer strategy-card" data-strategy="0">
+                        <div class="text-center">
+                            <div class="text-4xl mb-4">🛡️</div>
+                            <h3 class="text-xl font-semibold text-white mb-3">Conservative</h3>
+                            <p class="text-gray-300 mb-4">Low risk, steady growth with capital preservation</p>
+                            <div class="text-emerald-400 text-2xl font-bold mb-4">3-5% APY</div>
+                            <button class="strategy-btn btn-primary w-full text-white px-4 py-2 rounded-lg" data-strategy="0">
+                                Select Strategy
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card rounded-xl p-6 hover:shadow-xl transition-all duration-300 cursor-pointer strategy-card" data-strategy="1">
+                        <div class="text-center">
+                            <div class="text-4xl mb-4">⚖️</div>
+                            <h3 class="text-xl font-semibold text-white mb-3">Balanced</h3>
+                            <p class="text-gray-300 mb-4">Moderate risk with balanced growth and income</p>
+                            <div class="text-emerald-400 text-2xl font-bold mb-4">6-8% APY</div>
+                            <button class="strategy-btn btn-primary w-full text-white px-4 py-2 rounded-lg" data-strategy="1">
+                                Select Strategy
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card rounded-xl p-6 hover:shadow-xl transition-all duration-300 cursor-pointer strategy-card" data-strategy="2">
+                        <div class="text-center">
+                            <div class="text-4xl mb-4">🚀</div>
+                            <h3 class="text-xl font-semibold text-white mb-3">Growth</h3>
+                            <p class="text-gray-300 mb-4">Higher risk with potential for maximum growth</p>
+                            <div class="text-emerald-400 text-2xl font-bold mb-4">10-12% APY</div>
+                            <button class="strategy-btn btn-primary w-full text-white px-4 py-2 rounded-lg" data-strategy="2">
+                                Select Strategy
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="bg-black bg-opacity-30 py-8 mt-16">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center">
+                    <h3 class="text-xl font-semibold text-white mb-4">SecurePension</h3>
+                    <p class="text-gray-400 mb-4">Confidential Pension System - Private Retirement Management</p>
+                    <p class="text-gray-500 text-sm">
+                        Powered by Fully Homomorphic Encryption Technology • Built on Ethereum Sepolia Testnet
+                    </p>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+        // Contract configuration for Sepolia - based on working FHE example
+        const CONTRACT_ADDRESS = "0x4Ec99867250a377B4cc07A6989CcC664aEA935D3"; // Real deployed contract
+        const CONTRACT_ABI = [
+            "function createPensionAccount(uint256 _retirementAge, bytes calldata encryptedAge) external",
+            "function makeContribution(bytes calldata encryptedAmount) external payable",
+            "function selectInvestmentOption(uint256 optionId) external",
+            "function calculateReturns() external",
+            "function getAccountInfo() external view returns (uint256, uint256, bool, uint256)",
+            "function getEncryptedBalance(bytes32 publicKey, bytes calldata signature) external view returns (bytes memory)",
+            "event AccountCreated(address indexed user, uint256 retirementAge)",
+            "event ContributionMade(address indexed user, bytes encryptedAmount)",
+            "event InvestmentOptionSelected(address indexed user, uint256 optionId)"
+        ];
+
+        let account = null;
+        let contract = null;
+        let provider = null;
+        let signer = null;
+        let isLoading = false;
+        let accountInfo = null;
+
+        const strategies = [
+            { id: 0, name: 'Conservative', risk: 'Low Risk', apy: '3-5%' },
+            { id: 1, name: 'Balanced', risk: 'Moderate Risk', apy: '6-8%' },
+            { id: 2, name: 'Growth', risk: 'High Risk', apy: '10-12%' }
+        ];
+
+        function setStatusMessage(message) {
+            document.getElementById('statusMessage').textContent = `➤ ${message}`;
+            console.log('Status:', message);
+        }
+
+        function setLoading(loading) {
+            isLoading = loading;
+            const buttons = document.querySelectorAll('button');
+            buttons.forEach(btn => {
+                btn.disabled = loading;
+                if (loading && !btn.textContent.includes('...')) {
+                    btn.dataset.originalText = btn.textContent;
+                    if (btn.id === 'connectWallet') {
+                        btn.textContent = 'Connecting...';
+                    } else {
+                        btn.textContent = 'Loading...';
+                    }
+                } else if (!loading && btn.dataset.originalText) {
+                    btn.textContent = btn.dataset.originalText;
+                    delete btn.dataset.originalText;
+                }
+            });
+        }
+
+        // Real wallet connection - exact copy from working FHE example
+        async function connectWallet() {
+            try {
+                if (!window.ethereum) {
+                    alert('Please install MetaMask!');
+                    return;
+                }
+
+                setLoading(true);
+                setStatusMessage('Connecting to MetaMask...');
+
+                const accounts = await window.ethereum.request({
+                    method: 'eth_requestAccounts'
+                });
+
+                // Sepolia network check - exact copy from working example
+                const chainId = await window.ethereum.request({ method: 'eth_chainId' });
+                if (chainId !== '0xaa36a7') { // Sepolia chain ID
+                    try {
+                        await window.ethereum.request({
+                            method: 'wallet_switchEthereumChain',
+                            params: [{ chainId: '0xaa36a7' }],
+                        });
+                    } catch (switchError) {
+                        if (switchError.code === 4902) {
+                            await window.ethereum.request({
+                                method: 'wallet_addEthereumChain',
+                                params: [{
+                                    chainId: '0xaa36a7',
+                                    chainName: 'Sepolia Test Network',
+                                    rpcUrls: ['https://sepolia.infura.io/v3/'],
+                                    nativeCurrency: {
+                                        name: 'ETH',
+                                        symbol: 'ETH',
+                                        decimals: 18
+                                    },
+                                    blockExplorerUrls: ['https://sepolia.etherscan.io/']
+                                }]
+                            });
+                        }
+                    }
+                }
+
+                // Use ethers v6 BrowserProvider - exact copy from working example
+                provider = new ethers.BrowserProvider(window.ethereum);
+                signer = await provider.getSigner();
+                contract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
+
+                account = accounts[0];
+                
+                // Update UI to show connection success
+                const connectBtn = document.getElementById('connectWallet');
+                connectBtn.textContent = `${account.slice(0, 6)}...${account.slice(-4)}`;
+                connectBtn.classList.remove('btn-primary');
+                connectBtn.classList.add('bg-green-600', 'hover:bg-green-700');
+                
+                document.getElementById('networkStatus').innerHTML = '✅ Connected to Sepolia Testnet - Ready for encrypted pension transactions';
+                setStatusMessage('Connected to Sepolia! Ready for encrypted pension management 🏦');
+                
+                // Show account creation form
+                document.getElementById('accountCreation').classList.remove('hidden');
+                
+                // Try to load existing account info
+                await loadAccountInfo();
+
+            } catch (error) {
+                console.error('Wallet connection failed:', error);
+                setStatusMessage('Wallet connection failed ❌ Please try again');
+                
+                // Reset UI on failure
+                const connectBtn = document.getElementById('connectWallet');
+                connectBtn.textContent = 'Connect Wallet';
+                connectBtn.classList.add('btn-primary');
+                connectBtn.classList.remove('bg-green-600', 'hover:bg-green-700');
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        // Load account information from blockchain
+        async function loadAccountInfo() {
+            if (!contract || !account) return;
+
+            try {
+                const info = await contract.getAccountInfo();
+                if (info[0] > 0) { // If retirement age is set, account exists
+                    accountInfo = {
+                        retirementAge: Number(info[0]),
+                        lastContribution: Number(info[1]),
+                        isRetired: info[2],
+                        selectedInvestment: Number(info[3])
+                    };
+                    
+                    // Update UI with account info
+                    document.getElementById('accountRetireAge').textContent = accountInfo.retirementAge;
+                    document.getElementById('strategy').textContent = strategies[accountInfo.selectedInvestment]?.name || 'Conservative';
+                    document.getElementById('accountStatus').textContent = accountInfo.isRetired ? 'Retired' : 'Active';
+                    document.getElementById('accountCreation').classList.add('hidden');
+                    
+                    // Mock balance (in real implementation, decrypt FHE balance)
+                    document.getElementById('totalBalance').textContent = '$' + (Math.random() * 50000 + 10000).toFixed(2);
+                    
+                    setStatusMessage('Account loaded successfully! Ready for pension management');
+                }
+            } catch (error) {
+                console.error('Failed to load account info:', error);
+                setStatusMessage('Ready to create pension account or load existing one');
+            }
+        }
+
+        // Create pension account - real blockchain transaction
+        async function createAccount() {
+            if (!account || !contract) {
+                setStatusMessage('Please connect wallet first!');
+                return;
+            }
+
+            const age = document.getElementById('retirementAge').value;
+            if (!age || age < 55 || age > 75) {
+                setStatusMessage('Please enter a valid retirement age (55-75)');
+                return;
+            }
+
+            try {
+                setLoading(true);
+                setStatusMessage('Creating pension account on Sepolia blockchain...');
+
+                // Create encrypted age data (simplified for demo)
+                const encryptedAge = ethers.randomBytes(32);
+                
+                const tx = await contract.createPensionAccount(parseInt(age), encryptedAge);
+                setStatusMessage('Transaction sent! Waiting for blockchain confirmation...');
+                
+                await tx.wait();
+                
+                accountInfo = {
+                    retirementAge: parseInt(age),
+                    isRetired: false,
+                    selectedInvestment: 0
+                };
+                
+                document.getElementById('accountRetireAge').textContent = age;
+                document.getElementById('accountStatus').textContent = 'Active';
+                document.getElementById('accountCreation').classList.add('hidden');
+                document.getElementById('totalBalance').textContent = '$0.00';
+                
+                setStatusMessage(`Pension account created successfully! Retirement at age ${age} 🎉`);
+
+            } catch (error) {
+                console.error('Account creation failed:', error);
+                setStatusMessage('Account creation failed ❌ Check console for details');
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        // Make contribution - real blockchain transaction
+        async function makeContribution() {
+            if (!account || !contract) {
+                setStatusMessage('Please connect wallet first!');
+                return;
+            }
+
+            const amount = document.getElementById('contributionAmount').value;
+            if (!amount || amount <= 0) {
+                setStatusMessage('Please enter a valid contribution amount');
+                return;
+            }
+
+            try {
+                setLoading(true);
+                setStatusMessage('Processing encrypted contribution to blockchain...');
+
+                // Create encrypted amount (simplified for demo)
+                const encryptedAmount = ethers.randomBytes(32);
+                
+                const tx = await contract.makeContribution(encryptedAmount, { 
+                    value: ethers.parseEther(amount) 
+                });
+                setStatusMessage('Transaction sent! Waiting for blockchain confirmation...');
+                
+                await tx.wait();
+                
+                // Update balance
+                const currentBalance = parseFloat(document.getElementById('totalBalance').textContent.replace('$', '').replace(',', ''));
+                const newBalance = currentBalance + parseFloat(amount) * 2000; // Mock ETH to USD
+                document.getElementById('totalBalance').textContent = '$' + newBalance.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                document.getElementById('contributionAmount').value = '';
+                
+                setStatusMessage(`Contribution of ${amount} ETH processed successfully! 💰`);
+
+            } catch (error) {
+                console.error('Contribution failed:', error);
+                setStatusMessage('Contribution failed ❌ Check console for details');
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        // Select investment strategy - real blockchain transaction
+        async function selectStrategy(strategyId) {
+            if (!account || !contract) {
+                setStatusMessage('Please connect wallet first!');
+                return;
+            }
+
+            try {
+                setLoading(true);
+                setStatusMessage('Updating investment strategy on blockchain...');
+
+                const tx = await contract.selectInvestmentOption(strategyId);
+                setStatusMessage('Transaction sent! Waiting for blockchain confirmation...');
+                
+                await tx.wait();
+                
+                const strategy = strategies[strategyId];
+                document.getElementById('strategy').textContent = strategy.name;
+                
+                // Update visual selection
+                document.querySelectorAll('.strategy-card').forEach(card => {
+                    card.classList.remove('ring-2', 'ring-emerald-400');
+                });
+                document.querySelector(`[data-strategy="${strategyId}"]`).classList.add('ring-2', 'ring-emerald-400');
+                
+                setStatusMessage(`${strategy.name} strategy selected successfully! Expected ${strategy.apy} returns`);
+
+            } catch (error) {
+                console.error('Strategy selection failed:', error);
+                setStatusMessage('Strategy selection failed ❌ Check console for details');
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        // Calculate returns - real blockchain transaction
+        async function calculateReturns() {
+            if (!account || !contract) {
+                setStatusMessage('Please connect wallet first!');
+                return;
+            }
+
+            try {
+                setLoading(true);
+                setStatusMessage('Calculating encrypted returns on blockchain...');
+
+                const tx = await contract.calculateReturns();
+                setStatusMessage('Transaction sent! Calculating encrypted returns...');
+                
+                await tx.wait();
+                
+                // Simulate return calculation
+                const currentBalance = parseFloat(document.getElementById('totalBalance').textContent.replace('$', '').replace(',', ''));
+                const returnAmount = currentBalance * 0.05; // 5% return
+                const newBalance = currentBalance + returnAmount;
+                document.getElementById('totalBalance').textContent = '$' + newBalance.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2});
+                
+                setStatusMessage(`Returns calculated! Added $${returnAmount.toFixed(2)} to your balance 📈`);
+
+            } catch (error) {
+                console.error('Calculate returns failed:', error);
+                setStatusMessage('Calculate returns failed ❌ Check console for details');
+            } finally {
+                setLoading(false);
+            }
+        }
+
+        // Event listeners
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('connectWallet').addEventListener('click', connectWallet);
+            document.getElementById('createAccountBtn').addEventListener('click', createAccount);
+            document.getElementById('contributeBtn').addEventListener('click', makeContribution);
+            document.getElementById('calculateReturnsBtn').addEventListener('click', calculateReturns);
+            
+            document.querySelectorAll('.strategy-btn').forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    const strategyId = parseInt(e.target.getAttribute('data-strategy'));
+                    selectStrategy(strategyId);
+                });
+            });
+
+            // Smooth scrolling
+            document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    const target = document.querySelector(this.getAttribute('href'));
+                    if (target) {
+                        target.scrollIntoView({ behavior: 'smooth' });
+                    }
+                });
+            });
+
+            // Initial status message
+            setStatusMessage('Ready to connect - Install MetaMask and connect to Sepolia testnet');
+            
+            // Auto-connect if wallet is already connected
+            if (window.ethereum && window.ethereum.selectedAddress) {
+                connectWallet();
+            }
+        });
+
+        // Listen for account changes
+        if (window.ethereum) {
+            window.ethereum.on('accountsChanged', (accounts) => {
+                if (accounts.length === 0) {
+                    // User disconnected
+                    account = null;
+                    contract = null;
+                    document.getElementById('connectWallet').textContent = 'Connect Wallet';
+                    document.getElementById('connectWallet').classList.add('btn-primary');
+                    document.getElementById('connectWallet').classList.remove('bg-green-600', 'hover:bg-green-700');
+                    document.getElementById('networkStatus').innerHTML = '🔗 Connect MetaMask to access Sepolia Testnet';
+                    setStatusMessage('Wallet disconnected');
+                } else if (accounts[0] !== account) {
+                    // User switched accounts
+                    connectWallet();
+                }
+            });
+
+            window.ethereum.on('chainChanged', (chainId) => {
+                // Reload page when chain changes
+                window.location.reload();
+            });
+        }
+    </script>
+</body>
+</html>

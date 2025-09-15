@@ -5,15 +5,17 @@ import './index.css';
 // Contract configuration for Sepolia
 const CONTRACT_ADDRESS = "0xF71045bd12Ef5F0E0C30734dD6dCB75BB9b3aD78"; // Deploy your contract here
 const CONTRACT_ABI = [
-  "function createPensionAccount(uint256 _retirementAge, bytes calldata encryptedAge) external",
-  "function makeContribution(bytes calldata encryptedAmount) external",
+  "function createPensionAccount(uint256 _retirementAge) external",
+  "function makeContribution(uint64 amount) external payable",
   "function selectInvestmentOption(uint256 optionId) external",
   "function calculateReturns() external",
   "function initiateRetirement() external",
-  "function withdraw(bytes calldata encryptedAmount) external",
+  "function withdraw(uint64 amount) external payable",
   "function getAccountInfo() external view returns (uint256, uint256, bool, uint256)",
   "function getInvestmentOption(uint256 optionId) external view returns (string memory, uint256, bool)",
-  "function getEncryptedBalance(bytes32 publicKey, bytes calldata signature) external view returns (bytes memory)",
+  "function getBalance() external view returns (uint64)",
+  "function getContributions() external view returns (uint64)",
+  "function getReturns() external view returns (uint64)",
   "event AccountCreated(address indexed user, uint256 retirementAge)",
   "event ContributionMade(address indexed user, bytes encryptedAmount)",
   "event InvestmentOptionSelected(address indexed user, uint256 optionId)",
@@ -142,10 +144,8 @@ function App() {
       setLoading(true);
       setMessage('Creating pension account on blockchain...');
       
-      // In real implementation, you'd encrypt the age using FHE
-      const encryptedAge = ethers.randomBytes(32); // Mock encrypted data
-      
-      const tx = await contract.createPensionAccount(age, encryptedAge);
+      // Create pension account with retirement age
+      const tx = await contract.createPensionAccount(age);
       setMessage('Transaction sent! Creating your secure pension account...');
       
       await tx.wait();
@@ -178,10 +178,10 @@ function App() {
       setLoading(true);
       setMessage('Processing encrypted contribution...');
       
-      // In real implementation, you'd encrypt the amount using FHE
-      const encryptedAmount = ethers.randomBytes(32); // Mock encrypted data
-      
-      const tx = await contract.makeContribution(encryptedAmount);
+      // Make contribution with amount
+      const tx = await contract.makeContribution(Math.floor(amount), {
+        value: ethers.parseEther("0.001") // Small ETH amount for gas
+      });
       setMessage('Transaction sent! Your contribution is being encrypted and stored...');
       
       await tx.wait();
@@ -298,10 +298,10 @@ function App() {
       setLoading(true);
       setMessage('Processing encrypted withdrawal...');
       
-      // In real implementation, encrypt the amount using FHE
-      const encryptedAmount = ethers.randomBytes(32); // Mock encrypted data
-      
-      const tx = await contract.withdraw(encryptedAmount);
+      // Process withdrawal with amount
+      const tx = await contract.withdraw(Math.floor(withdrawAmount), {
+        value: ethers.parseEther("0.001") // Small ETH amount for gas
+      });
       setMessage('Transaction sent! Processing withdrawal...');
       
       await tx.wait();

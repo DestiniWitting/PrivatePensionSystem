@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useAccount, useContractRead, useContractWrite } from 'wagmi';
+import { ethers } from 'ethers';
 
 const PensionContext = createContext();
 
@@ -13,15 +14,17 @@ export const usePension = () => {
 
 const CONTRACT_ADDRESS = '0xF71045bd12Ef5F0E0C30734dD6dCB75BB9b3aD78'; // Updated after deployment
 const CONTRACT_ABI = [
-  "function createPensionAccount(uint256 _retirementAge, bytes calldata encryptedAge) external",
-  "function makeContribution(bytes calldata encryptedAmount) external",
+  "function createPensionAccount(uint256 _retirementAge) external",
+  "function makeContribution(uint64 amount) external payable",
   "function selectInvestmentOption(uint256 optionId) external",
   "function calculateReturns() external",
   "function initiateRetirement() external",
-  "function withdraw(bytes calldata encryptedAmount) external",
+  "function withdraw(uint64 amount) external payable",
   "function getAccountInfo() external view returns (uint256, uint256, bool, uint256)",
   "function getInvestmentOption(uint256 optionId) external view returns (string memory, uint256, bool)",
-  "function getEncryptedBalance(bytes32 publicKey, bytes calldata signature) external view returns (bytes memory)",
+  "function getBalance() external view returns (uint64)",
+  "function getContributions() external view returns (uint64)",
+  "function getReturns() external view returns (uint64)",
   "event AccountCreated(address indexed user, uint256 retirementAge)",
   "event ContributionMade(address indexed user, bytes encryptedAmount)",
   "event InvestmentOptionSelected(address indexed user, uint256 optionId)",
@@ -99,11 +102,11 @@ export const PensionProvider = ({ children }) => {
     loadInvestmentOptions();
   }, []);
 
-  const createPensionAccount = async (retirementAge, encryptedAge) => {
+  const createPensionAccount = async (retirementAge) => {
     try {
       setLoading(true);
       await createAccount({
-        args: [retirementAge, encryptedAge],
+        args: [retirementAge],
       });
     } catch (error) {
       console.error('Error creating pension account:', error);
@@ -113,11 +116,12 @@ export const PensionProvider = ({ children }) => {
     }
   };
 
-  const contribute = async (encryptedAmount) => {
+  const contribute = async (amount) => {
     try {
       setLoading(true);
       await makeContribution({
-        args: [encryptedAmount],
+        args: [Math.floor(amount)],
+        value: ethers.parseEther("0.001") // Small ETH for gas
       });
     } catch (error) {
       console.error('Error making contribution:', error);
@@ -153,11 +157,12 @@ export const PensionProvider = ({ children }) => {
     }
   };
   
-  const withdraw = async (encryptedAmount) => {
+  const withdraw = async (amount) => {
     try {
       setLoading(true);
       await withdrawFunds({
-        args: [encryptedAmount],
+        args: [Math.floor(amount)],
+        value: ethers.parseEther("0.001") // Small ETH for gas
       });
     } catch (error) {
       console.error('Error processing withdrawal:', error);

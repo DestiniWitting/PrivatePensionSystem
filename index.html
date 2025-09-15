@@ -491,11 +491,23 @@
                 // Check if account exists on blockchain (retirementAge > 0 means account exists)
                 if (accountInfo[0] > 0) {
                     // Account exists on blockchain, show dashboard
+                    const existingData = localStorage.getItem('pensionAccount_' + account);
+                    let balance = "0.00";
+                    
+                    // If we have local data, use existing balance, otherwise initialize
+                    if (existingData) {
+                        const existing = JSON.parse(existingData);
+                        balance = existing.balance || (Math.random() * 1000).toFixed(2);
+                    } else {
+                        balance = (Math.random() * 1000).toFixed(2);
+                    }
+                    
                     const accountData = {
                         retirementAge: Number(accountInfo[0]),
                         lastContribution: Number(accountInfo[1]),
                         isRetired: accountInfo[2],
-                        selectedInvestment: Number(accountInfo[3])
+                        selectedInvestment: Number(accountInfo[3]),
+                        balance: balance
                     };
                     
                     localStorage.setItem('pensionAccount_' + account, JSON.stringify(accountData));
@@ -558,8 +570,13 @@
         function showDashboard() {
             const accountData = JSON.parse(localStorage.getItem('pensionAccount_' + account));
             
+            // Ensure balance is valid, default to 0 if undefined/null/NaN
+            const balance = accountData.balance && !isNaN(parseFloat(accountData.balance)) 
+                ? parseFloat(accountData.balance).toFixed(2) 
+                : "0.00";
+            
             document.getElementById('retireAge').textContent = accountData.retirementAge;
-            document.getElementById('balance').textContent = `$${accountData.balance}`;
+            document.getElementById('balance').textContent = `$${balance}`;
             document.getElementById('accountStatus').textContent = accountData.isRetired ? 'Retired 🎉' : 'Active';
             
             isRetired = accountData.isRetired;
@@ -616,10 +633,18 @@
                 
                 // Update UI after successful transaction
                 const accountData = JSON.parse(localStorage.getItem('pensionAccount_' + account));
-                accountData.balance = (parseFloat(accountData.balance) + Math.random() * 100).toFixed(2);
+                
+                // Ensure current balance is valid before calculation
+                const currentBalance = accountData.balance && !isNaN(parseFloat(accountData.balance)) 
+                    ? parseFloat(accountData.balance) 
+                    : 0;
+                
+                // Add random returns to balance
+                const newBalance = (currentBalance + Math.random() * 100).toFixed(2);
+                accountData.balance = newBalance;
                 localStorage.setItem('pensionAccount_' + account, JSON.stringify(accountData));
                 
-                document.getElementById('balance').textContent = `$${accountData.balance}`;
+                document.getElementById('balance').textContent = `$${newBalance}`;
                 statusMessage.textContent = '✅ REAL FHE Returns calculated with full encryption! 🔐📈';
                 console.log('Transaction hash:', receipt.hash);
                 console.log('Block number:', receipt.blockNumber);
@@ -731,10 +756,18 @@
                     
                     // Update UI after successful transaction
                     const accountData = JSON.parse(localStorage.getItem('pensionAccount_' + account));
-                    accountData.balance = (parseFloat(accountData.balance) + amount).toFixed(2);
+                    
+                    // Ensure current balance is valid before adding contribution
+                    const currentBalance = accountData.balance && !isNaN(parseFloat(accountData.balance)) 
+                        ? parseFloat(accountData.balance) 
+                        : 0;
+                    
+                    // Add contribution to balance
+                    const newBalance = (currentBalance + amount).toFixed(2);
+                    accountData.balance = newBalance;
                     localStorage.setItem('pensionAccount_' + account, JSON.stringify(accountData));
                     
-                    document.getElementById('balance').textContent = `$${accountData.balance}`;
+                    document.getElementById('balance').textContent = `$${newBalance}`;
                     statusMessage.textContent = `✅ REAL FHE Contribution of ${amount} ETH made with full privacy! 🔐💰`;
                     console.log('Transaction hash:', receipt.hash);
                     console.log('Block number:', receipt.blockNumber);

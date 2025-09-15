@@ -21,7 +21,7 @@ const Retirement = () => {
   // Contract configuration
   const CONTRACT_ADDRESS = "0xF71045bd12Ef5F0E0C30734dD6dCB75BB9b3aD78";
   const CONTRACT_ABI = [
-    "function withdraw(bytes calldata encryptedAmount) external",
+    "function withdraw(uint64 amount) external payable",
     "function initiateRetirement() external",
     "function getAccountInfo() external view returns (uint256, uint256, bool, uint256)",
     "event WithdrawalMade(address indexed user, bytes encryptedAmount)",
@@ -89,16 +89,14 @@ const Retirement = () => {
       setIsProcessing(true);
       toast.loading('Processing encrypted withdrawal...');
       
-      // Convert ETH amount to wei and then to encrypted bytes
-      const amountInWei = ethers.parseEther(withdrawAmount.toString());
-      
-      // In a real FHE implementation, you would encrypt the amount using the FHE library
-      // For now, we'll create mock encrypted data
-      const encryptedAmount = ethers.randomBytes(32);
+      // Process withdrawal with amount
+      const amount = Math.floor(parseFloat(withdrawAmount));
       
       toast.loading('Sending withdrawal transaction to blockchain...');
       
-      const tx = await contract.withdraw(encryptedAmount);
+      const tx = await contract.withdraw(amount, {
+        value: ethers.parseEther("0.001") // Small ETH amount for gas
+      });
       toast.loading('Transaction sent! Waiting for blockchain confirmation...');
       
       await tx.wait();

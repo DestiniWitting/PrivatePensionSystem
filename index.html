@@ -485,16 +485,28 @@
         // Load account information from blockchain
         async function loadAccountInfo() {
             try {
-                // Check if user has participated in the game (has local account)
-                const existingAccount = localStorage.getItem('pensionAccount_' + account);
-                if (existingAccount) {
+                // Try to get real account info from blockchain contract
+                const accountInfo = await contract.getAccountInfo();
+                
+                // Check if account exists on blockchain (retirementAge > 0 means account exists)
+                if (accountInfo[0] > 0) {
+                    // Account exists on blockchain, show dashboard
+                    const accountData = {
+                        retirementAge: Number(accountInfo[0]),
+                        lastContribution: Number(accountInfo[1]),
+                        isRetired: accountInfo[2],
+                        selectedInvestment: Number(accountInfo[3])
+                    };
+                    
+                    localStorage.setItem('pensionAccount_' + account, JSON.stringify(accountData));
                     showDashboard();
                 } else {
+                    // No account on blockchain, show create form
                     createAccountCard.classList.remove('hidden');
                 }
                 
             } catch (error) {
-                console.log('Loading account info, showing create form');
+                console.log('No account found on blockchain, showing create form');
                 createAccountCard.classList.remove('hidden');
             }
         }
